@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "514459768287",
+    "project_id": "nas-mobile-1e28a",
+    "storage_bucket": "nas-mobile-1e28a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:514459768287:android:22d0da093bdd3ae339206a",
+        "android_client_info": {
+          "package_name": "com.example.nas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBfqwWl89QlGc_S_aiIMcASAiApD9UkO8U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
