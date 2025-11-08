@@ -1,20 +1,18 @@
 import 'package:equatable/equatable.dart';
+import 'package:nas/data/models/violation.dart';
 
 abstract class ViolationsEvent extends Equatable {
   const ViolationsEvent();
-
   @override
   List<Object?> get props => [];
 }
 
 class ViolationsFetchRequested extends ViolationsEvent {}
 
-class ViolationAppeal extends ViolationsEvent {
-  final int violationId;
-  final String reason;
-
-  const ViolationAppeal({required this.violationId, required this.reason});
+class ViolationAppealGenerated extends ViolationsEvent {
+  final Violation violation;
+  const ViolationAppealGenerated(this.violation);
 
   @override
-  List<Object?> get props => [violationId, reason];
+  List<Object?> get props => [violation];
 }

@@ -8,7 +8,7 @@ class JobModel extends Equatable {
   final String startTime;
   final String endTime;
   final String? description;
-  String? appliedBy;
+  int? appliedBy;
   final String? location;
   final String? salary;
   bool isPending; // new field
@@ -53,7 +53,7 @@ class JobModel extends Equatable {
       day: day ?? this.day,
       isPending: isPending ?? this.isPending,
       date: date ?? this.date,
-      appliedBy: appliedBy ?? this.appliedBy,
+      appliedBy: this.appliedBy,
       startTime: startTime ?? this.startTime,
       endTime: endTime ?? this.endTime,
       description: description ?? this.description,
@@ -72,14 +72,16 @@ class JobModel extends Equatable {
       date: json['date'] ?? '',
       startTime: json['startTime'] ?? '',
       endTime: json['endTime'] ?? '',
-      isPending: json['isPending'] ?? false,
+      isPending: (json['isPending'] as int? ?? 0) == 1,
       appliedBy: json['appliedBy'],
       description: json['description'],
       location: json['location'],
       salary: json['salary'],
       requirements:
           json['requirements'] != null
-              ? List<String>.from(json['requirements'])
+              ? (json['requirements'] is List
+                  ? List<String>.from(json['requirements'])
+                  : [json['requirements'].toString()])
               : [],
       status: json['status'] ?? 'new',
     );

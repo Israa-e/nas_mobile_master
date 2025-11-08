@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
 import 'package:nas/core/constant/url.dart';
+import 'package:nas/core/database/database_helper.dart';
+import 'package:nas/core/utils/shared_prefs.dart';
 import 'package:nas/presentation/view/screen/Auth/login.dart';
 import 'package:nas/presentation/view/screen/main/drawer/change_password.dart';
 import 'package:nas/presentation/view/screen/main/drawer/change_wallet_number.dart';
@@ -12,6 +14,12 @@ import 'package:nas/presentation/view/screen/main/drawer/modify_working_hours.da
 import 'package:nas/presentation/view/widget/button_border.dart';
 
 Drawer drawer(controller) {
+  int user = SharedPrefsHelper.getUserId();
+  DatabaseHelper dbHelper = DatabaseHelper.instance;
+  Future<List<Map<String, dynamic>>> userDetails = dbHelper.getAllUsersById(
+    user,
+  );
+
   return Drawer(
     width: double.infinity,
     shape: OutlineInputBorder(borderRadius: BorderRadius.zero),
@@ -66,7 +74,7 @@ Drawer drawer(controller) {
                                 ),
                               ),
                               title: Text(
-                                "الاسم ثنائي",
+                                "${userDetails.then((value) => value[0]['firstName'] ?? 'المستخدم')}",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,

@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
+import 'package:nas/presentation/bloc/jobs/jobs_bloc.dart';
 import 'package:nas/presentation/bloc/violations/violations_bloc.dart';
 import 'package:nas/presentation/bloc/violations/violations_event.dart';
 import 'package:nas/presentation/bloc/violations/violations_state.dart';
 import 'package:nas/presentation/view/widget/build_header.dart';
 import 'package:nas/presentation/view/widget/build_job_card.dart';
+import 'package:nas/presentation/view/widget/button_border.dart';
 import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 class ViolationsScreen extends StatefulWidget {
@@ -23,40 +25,33 @@ class _ViolationsScreenState extends State<ViolationsScreen> {
     context.read<ViolationsBloc>().add(ViolationsFetchRequested());
   }
 
-  void _showReasonDialog(String reason) {
+  void showReasonDialog(reason) {
     Get.dialog(
       Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 30),
+        // Add margin to the entire Dialog
+        insetPadding: EdgeInsets.symmetric(horizontal: 30),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
                   reason,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               ),
               SizedBox(height: Get.height * 0.026),
-              OutlinedButton(
-                onPressed: () => Get.back(),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: AppTheme.primaryColor),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 12,
-                  ),
-                ),
-                child: const Text(
-                  'إغلاق',
-                  style: TextStyle(color: AppTheme.primaryColor),
-                ),
+
+              ButtonBorder(
+                height: Get.height * 0.04,
+                borderRadius: 10,
+                onTap: () => Get.back(),
+                text: "إغلاق",
+                color: AppTheme.primaryColor,
               ),
             ],
           ),
@@ -114,7 +109,7 @@ class _ViolationsScreenState extends State<ViolationsScreen> {
                             violation: violation,
                             expiryDate: violation.expiryDate,
                             type: violation.type,
-                            onTap: () => _showReasonDialog(violation.reason),
+                            onTap: () => showReasonDialog(violation.reason),
                             controller: null,
                             color: AppTheme.red,
                             text: "السبب",

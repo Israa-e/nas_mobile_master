@@ -57,55 +57,82 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return;
       }
 
-      // Verify password (in real app, hash it!)
+      // Verify password (plain text in this example)
       if (userData['password'] != event.password) {
         emit(const AuthError('كلمة المرور غير صحيحة'));
         return;
       }
 
-      // Decode JSON fields
-      List<String> workHours = [];
+      // Parse JSON fields safely
+      List<String> favouriteDays = [];
+      List<String> favouriteTimes = [];
       List<String> selectedTasks = [];
+      List<String> workHours = [];
       Map<String, dynamic> firstContact = {};
       Map<String, dynamic> secondContact = {};
       Map<String, dynamic> acceptedTerms = {};
       bool acceptAlcohol = false;
 
-      if (userData['workHours'] != null) {
-        workHours = List<String>.from(jsonDecode(userData['workHours']));
-      }
+      try {
+        if (userData['favouriteDays'] != null &&
+            userData['favouriteDays'].isNotEmpty) {
+          favouriteDays = List<String>.from(
+            jsonDecode(userData['favouriteDays']),
+          );
+        }
 
-      if (userData['selectedTasks'] != null) {
-        selectedTasks = List<String>.from(
-          jsonDecode(userData['selectedTasks']),
-        );
-      }
+        if (userData['favouriteTimes'] != null &&
+            userData['favouriteTimes'].isNotEmpty) {
+          favouriteTimes = List<String>.from(
+            jsonDecode(userData['favouriteTimes']),
+          );
+        }
 
-      if (userData['firstContact'] != null) {
-        firstContact = Map<String, dynamic>.from(
-          jsonDecode(userData['firstContact']),
-        );
-      }
+        if (userData['selectedTasks'] != null &&
+            userData['selectedTasks'].isNotEmpty) {
+          selectedTasks = List<String>.from(
+            jsonDecode(userData['selectedTasks']),
+          );
+        }
 
-      if (userData['secondContact'] != null) {
-        secondContact = Map<String, dynamic>.from(
-          jsonDecode(userData['secondContact']),
-        );
-      }
+        // workHours is a plain string like "9:00-17:00", wrap in list
+        if (userData['workHours'] != null && userData['workHours'].isNotEmpty) {
+          workHours = [userData['workHours']];
+        }
 
-      if (userData['acceptedTerms'] != null) {
-        acceptedTerms = jsonDecode(userData['acceptedTerms']);
-      }
+        if (userData['firstContact'] != null &&
+            userData['firstContact'].isNotEmpty) {
+          firstContact = Map<String, dynamic>.from(
+            jsonDecode(userData['firstContact']),
+          );
+        }
 
-      if (userData['acceptAlcohol'] != null) {
-        acceptAlcohol = userData['acceptAlcohol'] == 1;
+        if (userData['secondContact'] != null &&
+            userData['secondContact'].isNotEmpty) {
+          secondContact = Map<String, dynamic>.from(
+            jsonDecode(userData['secondContact']),
+          );
+        }
+
+        if (userData['acceptedTerms'] != null &&
+            userData['acceptedTerms'].isNotEmpty) {
+          acceptedTerms = Map<String, dynamic>.from(
+            jsonDecode(userData['acceptedTerms']),
+          );
+        }
+
+        if (userData['acceptAlcohol'] != null) {
+          acceptAlcohol = userData['acceptAlcohol'] == 1;
+        }
+      } catch (e) {
+        print("JSON parsing error: $e");
       }
 
       // Save login state
       await SharedPrefsHelper.setLoggedIn(true);
       await SharedPrefsHelper.setUserId(userData['id']);
       await SharedPrefsHelper.setUserPhone(userData['phone']);
-      if (userData['token'] != null) {
+      if (userData['token'] != null && userData['token'].isNotEmpty) {
         await SharedPrefsHelper.setToken(userData['token']);
       }
 
@@ -132,8 +159,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         frontIdImage: userData['frontIdImage'] ?? '',
         backIdImage: userData['backIdImage'] ?? '',
         password: userData['password'] ?? '',
-        workHours: workHours,
+        favouriteDays: favouriteDays,
+        favouriteTimes: favouriteTimes,
         selectedTasks: selectedTasks,
+        workHours: workHours,
         firstContact: firstContact,
         secondContact: secondContact,
         acceptedTerms: acceptedTerms,

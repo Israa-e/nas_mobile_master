@@ -1,18 +1,14 @@
-import 'dart:ui';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
+import 'package:nas/core/database/database_helper.dart';
 import 'package:nas/data/models/job_model.dart';
-import 'package:nas/presentation/bloc/jobs/jobs_bloc.dart';
-import 'package:nas/presentation/bloc/jobs/jobs_event.dart';
-import 'package:nas/presentation/bloc/jobs/jobs_state.dart';
+
+import 'package:nas/presentation/view/screen/main/job_details_screen.dart';
 import 'package:nas/presentation/view/widget/build_header.dart';
 import 'package:nas/presentation/view/widget/build_job_card.dart';
-import 'package:nas/presentation/view/widget/button_border.dart';
-import 'package:nas/presentation/view/widget/custom_snackbar.dart';
-import 'package:nas/presentation/view/widget/primary_button.dart';
 
 class NewScreen extends StatefulWidget {
   const NewScreen({super.key});
@@ -22,11 +18,61 @@ class NewScreen extends StatefulWidget {
 }
 
 class _NewScreenState extends State<NewScreen> {
+  final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  List<JobModel> jobs = [];
+  bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
     // Fetch new jobs when screen loads
-    context.read<JobsBloc>().add(const JobsFetchRequested(status: 'new'));
+    _loadJobs();
+  }
+
+  Future<void> _loadJobs() async {
+    setState(() => isLoading = true);
+
+    try {
+      final jobsData = await _dbHelper.getAllJobs(status: 'new');
+
+      setState(() {
+        jobs =
+            jobsData.map((jobMap) {
+              // Parse requirements from JSON string
+              List<String>? requirements;
+              if (jobMap['requirements'] != null) {
+                try {
+                  requirements = List<String>.from(
+                    jsonDecode(jobMap['requirements']),
+                  );
+                } catch (e) {
+                  requirements = [];
+                }
+              }
+
+              return JobModel(
+                id: jobMap['id'] as int,
+                title: jobMap['title'] as String,
+                day: jobMap['day'] as String? ?? '',
+                date: jobMap['date'] as String? ?? '',
+                startTime: jobMap['startTime'] as String,
+                endTime: jobMap['endTime'] as String,
+                description: jobMap['description'] as String?,
+                location: jobMap['location'] as String?,
+                salary: jobMap['salary'] as String?,
+                requirements: requirements,
+                status: jobMap['status'] as String? ?? 'new',
+                isPending: (jobMap['isPending'] as int? ?? 0) == 1,
+                appliedBy: jobMap['appliedBy'],
+              );
+            }).toList();
+
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading jobs: $e');
+      setState(() => isLoading = false);
+    }
   }
 
   @override
@@ -40,133 +86,44 @@ class _NewScreenState extends State<NewScreen> {
             buildHeader(image: 'new', text: "طلبات جديدة"),
             Expanded(
               child: RefreshIndicator(
-                onRefresh: () async {},
-                child: BlocConsumer<JobsBloc, JobsState>(
-                  listener: (context, state) {
-                    if (state is JobActionSuccess) {
-                      showSuccessSnackbar(message: state.message);
-                    } else if (state is JobsError) {
-                      showErrorSnackbar(message: state.message);
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state is JobsLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (state is JobsLoaded) {
-                      if (state.jobs.isEmpty) {
-                        return const Center(
+                onRefresh: _loadJobs,
+                child:
+                    isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : jobs.isEmpty
+                        ? const Center(
                           child: Text(
                             'لا توجد وظائف متاحة',
                             style: TextStyle(fontSize: 18),
                           ),
-                        );
-                      }
-
-                      return ListView.builder(
-                        itemCount: state.jobs.length,
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        physics: const BouncingScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final job = state.jobs[index];
-                          return buildJobCard(
-                            index: index,
-                            onTap: () {
-                              showSuccessDialog(job: job);
-                            },
-                            job: job,
-                            type: job.title,
-                            controller: null,
-                          );
-                        },
-                      );
-                    } else if (state is JobsError) {
-                      return Center(
-                        child: Text(
-                          state.message,
-                          style: const TextStyle(color: Colors.red),
+                        )
+                        : ListView.builder(
+                          itemCount: jobs.length,
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          physics: const BouncingScrollPhysics(),
+                          itemBuilder: (context, index) {
+                            final job = jobs[index];
+                            return buildJobCard(
+                              index: index,
+                              onTap: () {
+                                Get.to(() => JobDetailsScreen(job: job))?.then((
+                                  _,
+                                ) {
+                                  _loadJobs(); // Refresh data when returning
+                                });
+                              },
+                              job: job,
+                              type: job.title,
+                              controller: null,
+                            );
+                          },
                         ),
-                      );
-                    }
-
-                    return const SizedBox();
-                  },
-                ),
               ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  void showSuccessDialog({required JobModel job}) {
-    Get.dialog(
-      Stack(
-        children: [
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-            child: Container(
-              color: Colors.black.withOpacity(0.5), // لون داكن شفاف
-            ),
-          ),
-          Dialog(
-            shadowColor: AppTheme.backgroundTransparent,
-            // Add margin to the entire Dialog
-            insetPadding: EdgeInsets.symmetric(horizontal: 30),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      "يمكنك متابعة الطلب من خلال زر الانتظار في أسفل الصفحة",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: Get.height * 0.026),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      PrimaryButton(
-                        onTap: () {
-                          Get.back();
-                          context.read<JobsBloc>().add(
-                            JobApplyRequested(job.id),
-                          );
-                        },
-                        text: 'تأكيد',
-                        height: Get.height * 0.04,
-                        borderRadius: 10,
-
-                        textColor: AppTheme.white,
-                        color: AppTheme.primaryColor,
-                      ),
-                      SizedBox(width: 30),
-                      ButtonBorder(
-                        height: Get.height * 0.04,
-                        borderRadius: 10,
-                        onTap: () => Get.back(),
-                        text: "إالغاء",
-
-                        color: AppTheme.red,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-      barrierDismissible: false,
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:nas/data/models/violation.dart';
 
 abstract class ViolationsState extends Equatable {
   const ViolationsState();
-
   @override
   List<Object?> get props => [];
 }
@@ -14,7 +13,6 @@ class ViolationsLoading extends ViolationsState {}
 
 class ViolationsLoaded extends ViolationsState {
   final List<Violation> violations;
-
   const ViolationsLoaded(this.violations);
 
   @override
@@ -23,7 +21,6 @@ class ViolationsLoaded extends ViolationsState {
 
 class ViolationsError extends ViolationsState {
   final String message;
-
   const ViolationsError(this.message);
 
   @override
@@ -32,7 +29,6 @@ class ViolationsError extends ViolationsState {
 
 class ViolationActionSuccess extends ViolationsState {
   final String message;
-
   const ViolationActionSuccess(this.message);
 
   @override

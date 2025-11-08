@@ -19,7 +19,6 @@ Map<String, Widget Function(BuildContext)> routes = {
   AppRoute.workerRegistration: (context) => const WorkerRegistrationScreen(),
   AppRoute.notification: (context) => const NotificationScreen(),
   AppRoute.mainHome: (context) => const MainHomeScreen(),
-
   AppRoute.location: (context) => const Location(),
   AppRoute.drawerJobSelection: (context) => JobSelectionScreen(),
   AppRoute.modifyWorkingHours: (context) => ModifyWorkingHours(),

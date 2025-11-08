@@ -1,72 +1,64 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:nas/core/network/api_client.dart';
+import 'violations_event.dart';
+import 'violations_state.dart';
 import 'package:nas/data/models/violation.dart';
-import 'package:nas/presentation/bloc/violations/violations_event.dart';
-import 'package:nas/presentation/bloc/violations/violations_state.dart';
+import '../jobs/jobs_state.dart';
 
 class ViolationsBloc extends Bloc<ViolationsEvent, ViolationsState> {
-  final ApiClient _apiClient = ApiClient();
-
   ViolationsBloc() : super(ViolationsInitial()) {
     on<ViolationsFetchRequested>(_onFetchRequested);
-    on<ViolationAppeal>(_onAppeal);
+    on<ViolationAppealGenerated>(_onViolationGenerated);
   }
+
+  final List<Violation> _violations = [];
 
   Future<void> _onFetchRequested(
     ViolationsFetchRequested event,
     Emitter<ViolationsState> emit,
   ) async {
     emit(ViolationsLoading());
-
-    try {
-      // Using JSONPlaceholder as dummy API
-      final response = await _apiClient.get('/comments?_limit=8');
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-
-        final violations =
-            data.map((item) {
-              return Violation(
-                type: _getRandomViolationType(item['id']),
-                expiryDate: '${15 + (item['id'] % 15)}/3/2025',
-                reason: item['body'],
-              );
-            }).toList();
-
-        emit(ViolationsLoaded(violations));
-      } else {
-        emit(const ViolationsError('فشل في تحميل المخالفات'));
-      }
-    } catch (e) {
-      emit(ViolationsError(e.toString()));
-    }
+    await Future.delayed(const Duration(milliseconds: 300));
+    emit(ViolationsLoaded(List.from(_violations)));
   }
 
-  String _getRandomViolationType(int id) {
+  Violation _generateRandomViolation(DateTime cancelDate) {
     final types = [
       'الإلغاء بعد الموافقة',
       'التأخر عن الموعد',
       'عدم الالتزام بالمعايير',
       'عدم إرسال المستندات',
     ];
-    return types[id % types.length];
+    final reasons = [
+      'تم إلغاء الوظيفة بعد الموافقة، تأكد من المواعيد القادمة.',
+      'تأخر الموظف عن الحضور.',
+      'عدم الالتزام بمعايير الشركة.',
+      'لم يتم إرسال المستندات المطلوبة.',
+    ];
+
+    final id = cancelDate.millisecondsSinceEpoch;
+    final expiryDate = cancelDate.add(const Duration(days: 15));
+    return Violation(
+      type: types[id % types.length],
+      reason: reasons[id % reasons.length],
+      expiryDate: '${expiryDate.day}/${expiryDate.month}/${expiryDate.year}',
+    );
   }
 
-  Future<void> _onAppeal(
-    ViolationAppeal event,
+  Future<void> _onViolationGenerated(
+    ViolationAppealGenerated event,
     Emitter<ViolationsState> emit,
   ) async {
-    try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+    _violations.add(event.violation);
+    emit(ViolationsLoaded(List.from(_violations)));
+  }
 
-      emit(const ViolationActionSuccess('تم إرسال طلب الاعتراض'));
-
-      // Refresh violations
-      add(ViolationsFetchRequested());
-    } catch (e) {
-      emit(ViolationsError(e.toString()));
-    }
+  void attachJobCancellationListener(Bloc<dynamic, dynamic> jobsBloc) {
+    jobsBloc.stream.listen((state) {
+      if (state is JobCancelledEvent) {
+        final violation = _generateRandomViolation(state.cancelDate);
+        add(ViolationAppealGenerated(violation));
+      }
+    });
   }
 }

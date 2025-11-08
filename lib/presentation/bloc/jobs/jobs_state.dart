@@ -14,26 +14,32 @@ class JobsLoading extends JobsState {}
 
 class JobsLoaded extends JobsState {
   final List<JobModel> jobs;
-
   const JobsLoaded(this.jobs);
 
   @override
   List<Object?> get props => [jobs];
 }
 
-class JobsError extends JobsState {
-  final String message;
+class JobCancelledEvent extends JobsState {
+  final int jobId;
+  final DateTime cancelDate;
+  const JobCancelledEvent(this.jobId, this.cancelDate);
 
-  const JobsError(this.message);
+  @override
+  List<Object?> get props => [jobId, cancelDate];
+}
+
+class JobActionSuccess extends JobsState {
+  final String message;
+  const JobActionSuccess(this.message);
 
   @override
   List<Object?> get props => [message];
 }
 
-class JobActionSuccess extends JobsState {
+class JobsError extends JobsState {
   final String message;
-
-  const JobActionSuccess(this.message);
+  const JobsError(this.message);
 
   @override
   List<Object?> get props => [message];
