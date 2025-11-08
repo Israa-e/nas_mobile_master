@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:nas/view/widget/custom_snackbar.dart';
+import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 class PageThreeController extends GetxController {
   final RxSet<String> selectedDays = <String>{}.obs;

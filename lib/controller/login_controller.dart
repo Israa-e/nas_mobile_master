@@ -1,13 +1,12 @@
-import 'package:firebase_messaging_platform_interface/src/remote_message.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
-import 'package:nas/view/screen/Auth/forgetPassword/forget_password.dart';
-import 'package:nas/view/screen/Auth/worker_registration_screen.dart';
-import 'package:nas/view/screen/main/main_home_screen.dart';
-import 'package:nas/view/widget/button_border.dart';
-import 'package:nas/view/widget/custom_snackbar.dart';
-import 'package:nas/view/widget/primary_button.dart';
+import 'package:nas/presentation/view/screen/Auth/forgetPassword/forget_password.dart';
+import 'package:nas/presentation/view/screen/Auth/worker_registration_screen.dart';
+import 'package:nas/presentation/view/screen/main/main_home_screen.dart';
+import 'package:nas/presentation/view/widget/button_border.dart';
+import 'package:nas/presentation/view/widget/custom_snackbar.dart';
+import 'package:nas/presentation/view/widget/primary_button.dart';
 import 'package:nas/data/fcm_api.dart';
 
 import 'worker_registration_controller.dart';
@@ -30,6 +29,7 @@ class LoginController extends GetxController {
     // Initialize FCM when controller is created
     initializeFCM();
   }
+
   // Initialize FCM
   Future<void> initializeFCM() async {
     try {
@@ -39,19 +39,19 @@ class LoginController extends GetxController {
       print('Error initializing FCM: $e');
     }
   }
+
   void toggleRememberMe(bool? value) {
     rememberMe = value ?? false;
     update();
   }
 
   // Login method
-  void login()async {
+  void login() async {
     try {
       Get.focusScope!.unfocus(); // Close the keyboard
 
       if (formstate.currentState != null &&
           formstate.currentState!.validate()) {
-
         // Show loading indicator
         Get.dialog(
           Center(child: CircularProgressIndicator()),
@@ -267,25 +267,22 @@ class LoginController extends GetxController {
       barrierDismissible: false,
     );
   }
+
   // Method to send a test notification
   Future<void> sendTestNotification() async {
     try {
       // Create a sample notification for testing
       final message = {
-        'notification': {
-          'title': 'مرحباً',
-          'body': 'تم تسجيل الدخول بنجاح!'
-        },
-        'data': {
-          'screen': 'home',
-          'item_id': 'welcome'
-        }
+        'notification': {'title': 'مرحباً', 'body': 'تم تسجيل الدخول بنجاح!'},
+        'data': {'screen': 'home', 'item_id': 'welcome'},
       };
 
       // Show local notification
-      fcmApi.showTestLocalNotification(  title: 'تنبيه',
-          body: 'هذا إشعار محلي تجريبي!',
-          data: {'screen': 'home', 'item_id': '123'});
+      fcmApi.showTestLocalNotification(
+        title: 'تنبيه',
+        body: 'هذا إشعار محلي تجريبي!',
+        data: {'screen': 'home', 'item_id': '123'},
+      );
       print('Test notification sent');
     } catch (e) {
       print('Error sending test notification: $e');

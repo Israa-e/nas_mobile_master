@@ -2,9 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nas/data/model/notification_item.dart';
-import 'package:nas/view/widget/button_border.dart';
-import 'package:nas/view/widget/custom_snackbar.dart';
+import 'package:nas/data/models/notification_item.dart';
+import 'package:nas/presentation/view/widget/button_border.dart';
+import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 import '../../core/constant/theme.dart';
 

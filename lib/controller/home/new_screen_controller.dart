@@ -3,9 +3,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
-import 'package:nas/data/model/job_request.dart';
-import 'package:nas/view/widget/button_border.dart';
-import 'package:nas/view/widget/primary_button.dart';
+import 'package:nas/data/models/job_request.dart';
+import 'package:nas/presentation/view/widget/button_border.dart';
+import 'package:nas/presentation/view/widget/primary_button.dart';
 
 class NewScreenController extends GetxController {
   var jobRequests = <JobRequest>[].obs;

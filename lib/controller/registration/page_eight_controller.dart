@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:nas/view/widget/custom_snackbar.dart';
+import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 class PageEightController extends GetxController {
   final RxString selectedFrontIDImage = 'c'.obs;
@@ -49,24 +49,13 @@ class PageEightController extends GetxController {
       final String? pickedImagePath = await pickImage();
       if (pickedImagePath != null) {
         selectedPersonalImage.value = pickedImagePath;
-        Get.snackbar(
-          'نجاح',
-          'تم اختيار الصورة الشخصية بنجاح',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+
+        showSuccessSnackbar(message: 'تم اختيار الصورة الشخصية بنجاح');
       } else {
-        Get.snackbar(
-          'تنبيه',
-          'لم يتم اختيار الصورة الشخصية',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.amber,
-          colorText: Colors.black,
-        );
+        showInfoSnackbar(message: 'لم يتم اختيار الصورة الشخصية');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to select personal image');
+      showErrorSnackbar(message: 'فشل في اختيار صورة الهوية الشخصية');
     }
   }
 

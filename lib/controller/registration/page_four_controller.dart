@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
-import 'package:nas/view/widget/custom_snackbar.dart';
+import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 class PageFourController extends GetxController {
   final RxSet<String> selectedWorkHours = <String>{}.obs;

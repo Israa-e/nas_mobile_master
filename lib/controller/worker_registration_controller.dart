@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/controller/registration/page_eight_controller.dart';
@@ -11,18 +14,20 @@ import 'package:nas/controller/registration/page_ten_controller.dart';
 import 'package:nas/controller/registration/page_three_controller.dart';
 import 'package:nas/controller/registration/page_two_controller.dart';
 import 'package:nas/core/constant/theme.dart';
-import 'package:nas/view/screen/Auth/login.dart';
-import 'package:nas/view/screen/Auth/registration/page_eight.dart';
-import 'package:nas/view/screen/Auth/registration/page_five.dart';
-import 'package:nas/view/screen/Auth/registration/page_four.dart';
-import 'package:nas/view/screen/Auth/registration/page_nine.dart';
-import 'package:nas/view/screen/Auth/registration/page_one.dart';
-import 'package:nas/view/screen/Auth/registration/page_seven.dart';
-import 'package:nas/view/screen/Auth/registration/page_six.dart';
-import 'package:nas/view/screen/Auth/registration/page_ten.dart';
-import 'package:nas/view/screen/Auth/registration/page_three.dart';
-import 'package:nas/view/screen/Auth/registration/page_two.dart';
-import 'package:nas/view/widget/button_border.dart';
+import 'package:nas/core/database/database_helper.dart';
+import 'package:nas/data/models/user_model.dart';
+import 'package:nas/presentation/view/screen/Auth/login.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_eight.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_five.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_four.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_nine.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_one.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_seven.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_six.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_ten.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_three.dart';
+import 'package:nas/presentation/view/screen/Auth/registration/page_two.dart';
+import 'package:nas/presentation/view/widget/button_border.dart';
 
 class WorkerRegistrationController extends GetxController {
   final PageController pageController = PageController();
@@ -195,10 +200,107 @@ class WorkerRegistrationController extends GetxController {
     }
   }
 
-  void submitSurvey() {
+  void submitSurvey() async {
     print(currentPage.value);
+
     if (currentPage.value == totalPages - 1) {
-      showSuccessDialog();
+      final userData = {
+        ...Get.find<PageOneController>().getFormData(),
+        ...Get.find<PageTwoController>().getFormData(),
+        ...Get.find<PageThreeController>().getFormData(),
+        ...Get.find<PageFourController>().getFormData(),
+        ...Get.find<PageFiveController>().getFormData(),
+        ...Get.find<PageSixController>().getFormData(),
+        ...Get.find<PageSevenController>().getFormData(),
+        ...Get.find<PageEightController>().getFormData(),
+        ...Get.find<PageNineController>().getFormData(),
+        ...Get.find<PageTenController>().getFormData(),
+      };
+
+      Future<String?> getDeviceToken() async {
+        FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+        // Ask for permission (iOS only)
+        await messaging.requestPermission();
+
+        // Get the token
+        String? token = await messaging.getToken();
+        print("📱 Device Token: $token");
+        return token;
+        // Store or send it where needed (e.g., database, API)
+      }
+
+      final user = UserModel(
+        phone: userData['phoneNumber'] ?? '',
+        firstName: userData['firstName'] ?? '',
+        fatherName: userData['fatherName'] ?? '',
+        grandFatherName: userData['grandFatherName'] ?? '',
+        familyName: userData['familyName'] ?? '',
+        birthDate: userData['birthDate'] ?? '',
+        selectedTasks: List<String>.from(userData['selectedTasks'] ?? []),
+        workHours: List<String>.from(userData['workHours'] ?? []),
+        accountName: userData['accountName'] ?? '',
+        accountNumber: userData['accountNumber'] ?? '',
+        departmentName: userData['departmentName'] ?? '',
+        governorate: userData['governorate'] ?? '',
+        district: userData['district'] ?? '',
+        location: userData['location'] ?? '',
+        nationalId: userData['nationalId'] ?? '',
+        nationality: userData['nationality'] ?? '',
+        gender: userData['gender'] ?? '',
+        maritalStatus: userData['maritalStatus'] ?? '',
+        countryCode: userData['countryCode'] ?? '',
+        personalImage: userData['personalImage'] ?? '',
+        frontIdImage: userData['frontIdImage'] ?? '',
+        backIdImage: userData['backIdImage'] ?? '',
+        password: userData['password'] ?? '',
+        firstContact: userData['firstContact'] ?? {},
+        secondContact: userData['secondContact'] ?? {},
+        acceptedTerms: userData['acceptedTerms'] ?? false,
+        acceptAlcohol: userData['acceptAlcohol'] ?? false,
+        createdAt: DateTime.now().millisecondsSinceEpoch,
+        token: await getDeviceToken() ?? "",
+      );
+      final dbUser = {
+        'phone': user.phone,
+        'firstName': user.firstName,
+        'fatherName': user.fatherName,
+        'grandFatherName': user.grandFatherName,
+        'familyName': user.familyName,
+        'birthDate': user.birthDate,
+        'accountName': user.accountName,
+        'departmentName': user.departmentName,
+        'accountNumber': user.accountNumber,
+        'workHours': jsonEncode(user.workHours),
+        'favouriteDays': null,
+        'favouriteTimes': null,
+        'selectedTasks': jsonEncode(user.selectedTasks),
+        'acceptAlcohol': (user.acceptAlcohol == true) ? 1 : 0,
+        'governorate': user.governorate,
+        'district': user.district,
+        'location': user.location,
+        'nationalId': user.nationalId,
+        'nationality': user.nationality,
+        'gender': user.gender,
+        'maritalStatus': user.maritalStatus,
+        'countryCode': user.countryCode,
+        'personalImage': user.personalImage,
+        'frontIdImage': user.frontIdImage,
+        'backIdImage': user.backIdImage,
+        'password': user.password,
+        'firstContact': jsonEncode(user.firstContact),
+        'secondContact': jsonEncode(user.secondContact),
+        'acceptedTerms': jsonEncode(user.acceptedTerms),
+        'token': user.token,
+        'createdAt': user.createdAt,
+      };
+      final DatabaseHelper dbHelper = DatabaseHelper.instance;
+      await dbHelper.insertUser(dbUser).then((value) {
+        print("✅ User inserted with ID: $value");
+        showSuccessDialog();
+      });
+      final addedUser = await dbHelper.getUser(user.phone);
+      print("✅ User added: $addedUser");
     } else {
       nextPage();
     }

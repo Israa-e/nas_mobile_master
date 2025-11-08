@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/controller/registration/page_ten_controller.dart';
 import 'package:nas/core/constant/theme.dart';
-import 'package:nas/view/widget/custom_title.dart';
-import 'package:nas/view/widget/primary_button.dart';
+import 'package:nas/presentation/view/widget/custom_title.dart';
+import 'package:nas/presentation/view/widget/primary_button.dart';
 
 class CustomBottomSheet extends StatelessWidget {
   final String title;

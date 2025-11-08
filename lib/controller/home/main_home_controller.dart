@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
-import 'package:nas/view/screen/main/approvals_screen.dart';
-import 'package:nas/view/screen/main/new_screen.dart';
-import 'package:nas/view/screen/main/violations_screen.dart';
-import 'package:nas/view/screen/main/waiting_screen.dart';
-import 'package:nas/view/widget/button_border.dart';
+import 'package:nas/presentation/view/screen/main/approvals_screen.dart';
+import 'package:nas/presentation/view/screen/main/new_screen.dart';
+import 'package:nas/presentation/view/screen/main/violations_screen.dart';
+import 'package:nas/presentation/view/screen/main/waiting_screen.dart';
+import 'package:nas/presentation/view/widget/button_border.dart';
 
 class MainHomeController extends GetxController
     with GetTickerProviderStateMixin {

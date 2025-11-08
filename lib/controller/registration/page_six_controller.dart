@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nas/view/widget/custom_snackbar.dart';
+import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 class PageSixController extends GetxController {
   final formKey = GlobalKey<FormState>();
@@ -16,9 +16,16 @@ class PageSixController extends GetxController {
   final locationFocusNode = FocusNode();
   final nationalIdFocusNode = FocusNode();
 
-  final selectedGender = RxString('أنثى');
+  final selectedNationality = RxString('فلسطيني');
 
-  List<String> genderOptions = ['ذكر', 'أنثى'];
+  List<String> nationalityOptions = [
+    'فلسطيني',
+    'أردني',
+    'مصري',
+    'سوري',
+    'لبناني',
+    'آخر',
+  ];
   void updateLocation(String address) {
     locationController.text = address;
   }
@@ -29,7 +36,7 @@ class PageSixController extends GetxController {
       'district': districtController.text,
       'location': locationController.text,
       'nationalId': nationalIdController.text,
-      'gender': selectedGender.value,
+      'nationality': selectedNationality.value,
     };
   }
 
@@ -39,7 +46,7 @@ class PageSixController extends GetxController {
         districtController.text.isEmpty ||
         locationController.text.isEmpty ||
         nationalIdController.text.isEmpty ||
-        selectedGender.value.isEmpty) {
+        selectedNationality.value.isEmpty) {
       if (showSnackbar) {
         showInfoSnackbar(message: 'الرجاء إكمال جميع الحقول المطلوبة');
       }

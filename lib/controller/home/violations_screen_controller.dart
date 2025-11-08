@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
-import 'package:nas/data/model/violation.dart';
-import 'package:nas/view/widget/button_border.dart';
+import 'package:nas/data/models/violation.dart';
+import 'package:nas/presentation/view/widget/button_border.dart';
 
 class ViolationsScreenController extends GetxController {
   var violations = <Violation>[].obs;
