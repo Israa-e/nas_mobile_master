@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nas/core/database/database_helper.dart';
+import 'package:nas/core/utils/shared_prefs.dart';
 import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 class PageSevenController extends GetxController {
@@ -71,5 +75,46 @@ class PageSevenController extends GetxController {
   void handleFocusTransition(FocusNode currentFocus, FocusNode nextFocus) {
     currentFocus.unfocus();
     nextFocus.requestFocus();
+  }
+
+  // Load user data from DB
+  Future<void> loadUserData() async {
+    try {
+      int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) return;
+
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+      final userDetails = await dbHelper.getAllUsersById(userId);
+      if (userDetails.isEmpty) return;
+
+      final userData = userDetails[0];
+
+      phoneController.text = userData['phone'] ?? '';
+      selectedCountryCode.value = userData['countryCode'] ?? '+970';
+
+      print(" phoneController : ${phoneController.text}");
+    } catch (e) {
+      print('Error loading PageFour data: $e');
+    }
+  }
+
+  // Save user data to DB
+  Future<void> saveUserData() async {
+    try {
+      int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) return;
+
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+
+      await dbHelper.updateUser(userId, {
+        'phone': phoneController.text.trim(),
+        'countryCode': selectedCountryCode.value,
+      });
+
+      showSuccessSnackbar(message: "تم تحديث رقم الهاتف");
+    } catch (e) {
+      print('Error saving PageFour data: $e');
+      showInfoSnackbar(message: 'فشل حفظ بياناتك');
+    }
   }
 }

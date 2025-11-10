@@ -1,6 +1,6 @@
 -- Merging decision tree log ---
 application
-INJECTED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:8:5-49:19
+INJECTED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:10:5-51:19
 INJECTED from D:\Flutter GSG\nas_mobile_master\android\app\src\debug\AndroidManifest.xml
 MERGED from [:firebase_messaging] D:\Flutter GSG\nas_mobile_master\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:13:5-46:19
 MERGED from [:firebase_messaging] D:\Flutter GSG\nas_mobile_master\build\firebase_messaging\intermediates\merged_manifest\debug\processDebugManifest\AndroidManifest.xml:13:5-46:19
@@ -59,8 +59,8 @@ MERGED from [com.google.maps.android:android-maps-utils:3.6.0] C:\Users\israa\.g
 	android:name
 		INJECTED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml
 manifest
-ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:1:1-68:12
-MERGED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:1:1-68:12
+ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:1:1-70:12
+MERGED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:1:1-70:12
 INJECTED from D:\Flutter GSG\nas_mobile_master\android\app\src\debug\AndroidManifest.xml:1:1-7:12
 INJECTED from D:\Flutter GSG\nas_mobile_master\android\app\src\debug\AndroidManifest.xml:1:1-7:12
 INJECTED from D:\Flutter GSG\nas_mobile_master\android\app\src\debug\AndroidManifest.xml:1:1-7:12
@@ -196,24 +196,32 @@ MERGED from [com.google.firebase:firebase-messaging:24.1.1] C:\Users\israa\.grad
 MERGED from [com.google.firebase:firebase-messaging:24.1.1] C:\Users\israa\.gradle\caches\8.10.2\transforms\f80248970efbd3bafd1721bfcda96536\transformed\jetified-firebase-messaging-24.1.1\AndroidManifest.xml:23:5-77
 	android:name
 		ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:6:22-74
+uses-permission#android.permission.READ_EXTERNAL_STORAGE
+ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:7:5-79
+	android:name
+		ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:7:22-77
+uses-permission#android.permission.CAMERA
+ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:8:5-64
+	android:name
+		ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:8:22-62
 queries
-ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:55:10-61:11
+ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:57:10-63:11
 MERGED from [com.google.android.gms:play-services-maps:18.2.0] C:\Users\israa\.gradle\caches\8.10.2\transforms\b9c01572a1c0fb30052b74754d7f0455\transformed\jetified-play-services-maps-18.2.0\AndroidManifest.xml:30:5-34:15
 MERGED from [com.google.android.gms:play-services-maps:18.2.0] C:\Users\israa\.gradle\caches\8.10.2\transforms\b9c01572a1c0fb30052b74754d7f0455\transformed\jetified-play-services-maps-18.2.0\AndroidManifest.xml:30:5-34:15
 intent#action:name:android.intent.action.VIEW+category:name:android.intent.category.BROWSABLE+data:scheme:https
-ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:56:5-60:14
+ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:58:5-62:14
 action#android.intent.action.VIEW
-ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:57:9-61
+ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:59:9-61
 	android:name
-		ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:57:17-58
+		ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:59:17-58
 category#android.intent.category.BROWSABLE
-ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:58:9-70
+ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:60:9-70
 	android:name
-		ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:58:19-67
+		ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:60:19-67
 data
-ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:59:9-40
+ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:61:9-40
 	android:scheme
-		ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:59:15-37
+		ADDED from D:\Flutter GSG\nas_mobile_master\android\app\src\main\AndroidManifest.xml:61:15-37
 uses-sdk
 INJECTED from D:\Flutter GSG\nas_mobile_master\android\app\src\debug\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\Flutter GSG\nas_mobile_master\android\app\src\debug\AndroidManifest.xml

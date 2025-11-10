@@ -1,21 +1,64 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:nas/controller/registration/page_eight_controller.dart';
 import 'package:nas/core/constant/theme.dart';
 import 'package:nas/core/constant/url.dart';
+import 'package:nas/core/database/database_helper.dart';
+import 'package:nas/core/utils/shared_prefs.dart';
 import 'package:nas/presentation/view/widget/build_password_field.dart';
 import 'package:nas/presentation/view/widget/button_border.dart';
+import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 import 'package:nas/presentation/view/widget/custom_title.dart';
 import 'package:nas/presentation/view/widget/primary_button.dart';
 
-class ChangePassword extends StatelessWidget {
+class ChangePassword extends StatefulWidget {
   const ChangePassword({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final PageEightController controller = Get.find<PageEightController>();
+  State<ChangePassword> createState() => _ChangePasswordState();
+}
 
+class _ChangePasswordState extends State<ChangePassword> {
+  String password = '';
+
+  Future<Map<String, dynamic>?> getUserData() async {
+    try {
+      int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) return null;
+
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+      List<Map<String, dynamic>> userDetails = await dbHelper.getAllUsersById(
+        userId,
+      );
+
+      if (userDetails.isNotEmpty) {
+        password = userDetails[0]['password'];
+        print("user password: $password");
+
+        return userDetails[0];
+      }
+
+      return null;
+    } catch (e) {
+      print('Error getting user data: $e');
+      return null;
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserData();
+  }
+
+  final PageEightController controller = Get.find<PageEightController>();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
       body: GestureDetector(
@@ -90,7 +133,15 @@ class ChangePassword extends StatelessWidget {
             Expanded(
               child: PrimaryButton(
                 onTap: () {
-                  Get.back();
+                  if (password ==
+                      controller.oldPasswordController.text.trim()) {
+                    if (controller.newPasswordController.text.trim() ==
+                        controller.confirmPasswordController.text.trim()) {
+                      saveUserData();
+                    }
+                  } else {
+                    showInfoSnackbar(message: 'كلمة السر غير صحيحة ');
+                  }
                 },
                 text: "حفظ",
               ),
@@ -110,5 +161,23 @@ class ChangePassword extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> saveUserData() async {
+    try {
+      int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) return;
+
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+
+      await dbHelper.updateUser(userId, {
+        'password': controller.newPasswordController.text.trim(),
+      });
+
+      showSuccessSnackbar(message: 'تم حفظ كلمة المرور بنجاح');
+    } catch (e) {
+      print('Error saving PageFour data: $e');
+      showInfoSnackbar(message: 'فشل حفظ كلمة المرور');
+    }
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
 import 'package:nas/data/models/job_model.dart';
-import 'package:nas/data/models/job_request.dart';
 
 Widget buildJobCard({
   required int index,

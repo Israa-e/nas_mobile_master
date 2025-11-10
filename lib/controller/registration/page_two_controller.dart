@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/controller/registration/custom_bottom_sheet.dart';
@@ -22,6 +24,7 @@ class PageTwoController extends GetxController {
     'نظافة وجلي المطبخ',
     'تحميل وتنزيل',
   ];
+
   final List<String> taskQuestions = [
     'هل يمكنك تقديم الكحول في حال قبوله؟',
     'هل لديك خبرة في تقطيع الخضار؟',
@@ -40,6 +43,60 @@ class PageTwoController extends GetxController {
   void onInit() {
     super.onInit();
     taskSelectionController(); // تهيئة القيم عند البداية
+  }
+
+  // NEW METHOD: Load user's previously selected tasks from database
+  Future<void> loadUserSelectedTasks(Map<String, dynamic> userData) async {
+    try {
+      if (userData['selectedTasks'] == null) {
+        print("No previously selected tasks found");
+        return;
+      }
+
+      List<String> userSelectedTaskNames = [];
+
+      // Parse selectedTasks based on its type
+      if (userData['selectedTasks'] is String) {
+        // If it's a JSON string: '["مقدم طعام وشراب","منظف غرف"]'
+        String jsonString = userData['selectedTasks'];
+        userSelectedTaskNames = List<String>.from(jsonDecode(jsonString));
+      } else if (userData['selectedTasks'] is List) {
+        // If it's already a List
+        userSelectedTaskNames = List<String>.from(userData['selectedTasks']);
+      }
+
+      print("User's previously selected tasks: $userSelectedTaskNames");
+
+      // Mark the tasks as selected
+      for (String taskName in userSelectedTaskNames) {
+        int taskIndex = tasks.indexWhere((task) => task == taskName);
+
+        if (taskIndex != -1) {
+          selectedTasks[taskIndex] = true;
+
+          // Add to selectedWithQuestion to show the question
+          if (!selectedWithQuestion.contains(taskIndex)) {
+            selectedWithQuestion.add(taskIndex);
+          }
+
+          // If it's "مقدم طعام وشراب", show alcohol question
+          if (taskName == 'مقدم طعام وشراب') {
+            showDrinkQuestion.value = true;
+            // Load acceptAlcohol from database if available
+            if (userData['acceptAlcohol'] != null) {
+              acceptAlcohol.value = userData['acceptAlcohol'] == 1;
+              taskAnswers[taskIndex] = acceptAlcohol.value;
+            }
+          }
+        }
+      }
+
+      selectedTasks.refresh();
+      selectedWithQuestion.refresh();
+      print("Loaded ${userSelectedTaskNames.length} selected tasks");
+    } catch (e) {
+      print('Error loading user selected tasks: $e');
+    }
   }
 
   bool rememberMe = false;

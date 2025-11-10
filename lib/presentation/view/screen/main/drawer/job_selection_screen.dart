@@ -1,17 +1,66 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:nas/controller/registration/page_two_controller.dart';
 import 'package:nas/core/constant/theme.dart';
+import 'package:nas/core/database/database_helper.dart';
+import 'package:nas/core/utils/shared_prefs.dart';
 import 'package:nas/presentation/view/widget/button_border.dart';
 import 'package:nas/presentation/view/widget/custom_checkbox.dart';
 import 'package:nas/presentation/view/widget/custom_radio_button.dart';
+import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 import 'package:nas/presentation/view/widget/custom_title.dart';
 import 'package:nas/presentation/view/widget/primary_button.dart';
 
-class JobSelectionScreen extends StatelessWidget {
+class JobSelectionScreen extends StatefulWidget {
   const JobSelectionScreen({super.key});
+
+  @override
+  State<JobSelectionScreen> createState() => _JobSelectionScreenState();
+}
+
+class _JobSelectionScreenState extends State<JobSelectionScreen> {
+  Map<String, dynamic>? userData;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
+
+  // Load user data from database
+  Future<void> loadUserData() async {
+    try {
+      int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) {
+        setState(() => isLoading = false);
+        return;
+      }
+
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+      List<Map<String, dynamic>> userDetails = await dbHelper.getAllUsersById(
+        userId,
+      );
+
+      if (userDetails.isNotEmpty) {
+        userData = userDetails[0];
+        print("user data: $userData");
+
+        // Load selected tasks into controller
+        final PageTwoController controller = Get.find<PageTwoController>();
+        await controller.loadUserSelectedTasks(userData!);
+      }
+
+      setState(() => isLoading = false);
+    } catch (e) {
+      print('Error getting user data: $e');
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -253,8 +302,6 @@ class JobSelectionScreen extends StatelessWidget {
                           ),
                         ),
               ),
-
-              Spacer(),
             ],
           ),
         ),
@@ -269,8 +316,13 @@ class JobSelectionScreen extends StatelessWidget {
           children: [
             Expanded(
               child: PrimaryButton(
-                onTap: () {
-                  Get.back();
+                onTap: () async {
+                  if (!controller.validate()) return;
+
+                  // Save to database
+                  if (userData != null) {
+                    await saveUserTasks(userData!['id']);
+                  }
                 },
                 text: "حفظ",
               ),
@@ -290,5 +342,27 @@ class JobSelectionScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> saveUserTasks(int userId) async {
+    try {
+      final PageTwoController controller = Get.find<PageTwoController>();
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+
+      // Get selected tasks as JSON string
+      Map<String, dynamic> formData = controller.getFormData();
+      String selectedTasksJson = jsonEncode(formData['selectedTasks']);
+
+      // Update database
+      await dbHelper.updateUser(userId, {
+        'selectedTasks': selectedTasksJson,
+        'acceptAlcohol': formData['acceptAlcohol'] == true ? 1 : 0,
+      });
+      showSuccessSnackbar(message: 'تم حفظ اختياراتك بنجاح');
+    } catch (e) {
+      print('Error saving tasks: $e');
+
+      showErrorSnackbar(message: 'فشل حفظ الاختيارات');
+    }
   }
 }

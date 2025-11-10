@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
+import 'package:nas/core/database/database_helper.dart';
+import 'package:nas/core/utils/shared_prefs.dart';
 import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 class PageThreeController extends GetxController {
@@ -34,9 +38,55 @@ class PageThreeController extends GetxController {
   bool get isFormValid => selectedDays.isNotEmpty && selectedTimes.isNotEmpty;
   Map<String, dynamic> getFormData() {
     return {
-      'selectedDays': selectedDays.toList(),
-      'selectedTimes': selectedTimes.toList(),
+      'favouriteDays': selectedDays.toList(),
+      'favouriteTimes': selectedTimes.toList(),
     };
+  }
+
+  // Load data from DB
+  Future<void> loadUserData() async {
+    try {
+      int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) return;
+
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+      final userDetails = await dbHelper.getAllUsersById(userId);
+      if (userDetails.isEmpty) return;
+
+      final userData = userDetails[0];
+
+      final daysList = List<String>.from(
+        jsonDecode(userData['favouriteDays'] ?? '[]'),
+      );
+      selectedDays.addAll(daysList);
+
+      final timesList = List<String>.from(
+        jsonDecode(userData['favouriteTimes'] ?? '[]'),
+      );
+      selectedTimes.addAll(timesList);
+    } catch (e) {
+      print('Error loading PageThree data: $e');
+    }
+  }
+
+  // Save data to DB
+  Future<void> saveUserData() async {
+    try {
+      int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) return;
+
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+
+      await dbHelper.updateUser(userId, {
+        'favouriteDays': jsonEncode(selectedDays.toList()),
+        'favouriteTimes': jsonEncode(selectedTimes.toList()),
+      });
+
+      showSuccessSnackbar(message: 'تم حفظ أيامك وفتراتك بنجاح');
+    } catch (e) {
+      print('Error saving PageThree data: $e');
+      showInfoSnackbar(message: 'فشل حفظ أيامك وفتراتك');
+    }
   }
 
   // Add this validate method

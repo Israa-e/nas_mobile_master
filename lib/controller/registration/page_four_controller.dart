@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/constant/theme.dart';
+import 'package:nas/core/database/database_helper.dart';
+import 'package:nas/core/utils/shared_prefs.dart';
 import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 class PageFourController extends GetxController {
@@ -182,5 +186,55 @@ class PageFourController extends GetxController {
   void handleFocusTransition(FocusNode currentFocus, FocusNode nextFocus) {
     currentFocus.unfocus();
     nextFocus.requestFocus();
+  }
+
+  // Load user data from DB
+  Future<void> loadUserData() async {
+    try {
+      int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) return;
+
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+      final userDetails = await dbHelper.getAllUsersById(userId);
+      if (userDetails.isEmpty) return;
+
+      final userData = userDetails[0];
+
+      if (userData['workHours'] != null) {
+        final workHoursList = List<String>.from(
+          jsonDecode(userData['workHours']),
+        );
+        selectedWorkHours.addAll(workHoursList);
+      }
+
+      accountNameController.text = userData['accountName'] ?? '';
+      departmentNameController.text = userData['departmentName'] ?? '';
+      accountNumberController.text = userData['accountNumber'] ?? '';
+    } catch (e) {
+      print('Error loading PageFour data: $e');
+    }
+  }
+
+  // Save user data to DB
+  Future<void> saveUserData() async {
+    try {
+      int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) return;
+
+      DatabaseHelper dbHelper = DatabaseHelper.instance;
+      final data = getFormData();
+
+      await dbHelper.updateUser(userId, {
+        'workHours': jsonEncode(data['workHours']),
+        'accountName': data['accountName'],
+        'departmentName': data['departmentName'],
+        'accountNumber': data['accountNumber'],
+      });
+
+      showSuccessSnackbar(message: 'تم حفظ ساعاتك وبياناتك البنكية بنجاح');
+    } catch (e) {
+      print('Error saving PageFour data: $e');
+      showInfoSnackbar(message: 'فشل حفظ ساعاتك وبياناتك');
+    }
   }
 }

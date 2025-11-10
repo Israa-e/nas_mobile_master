@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -9,14 +11,26 @@ import 'package:nas/presentation/view/widget/custom_checkbox.dart';
 import 'package:nas/presentation/view/widget/custom_title.dart';
 import 'package:nas/presentation/view/widget/primary_button.dart';
 
-class ModifyWorkingHours extends StatelessWidget {
+class ModifyWorkingHours extends StatefulWidget {
   const ModifyWorkingHours({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final PageFourController controller2 = Get.find<PageFourController>();
-    final PageThreeController controller = Get.find<PageThreeController>();
+  State<ModifyWorkingHours> createState() => _ModifyWorkingHoursState();
+}
 
+class _ModifyWorkingHoursState extends State<ModifyWorkingHours> {
+  final PageFourController controller2 = Get.find<PageFourController>();
+  final PageThreeController controller = Get.find<PageThreeController>();
+
+  @override
+  void initState() {
+    super.initState();
+    controller.loadUserData();
+    controller2.loadUserData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
       body: GestureDetector(
@@ -27,25 +41,21 @@ class ModifyWorkingHours extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  // Work Hours
                   CustomTitle(
                     title: "ساعات العمل ؟",
                     supText: true,
-                    supTitle:
-                        "تعديل ساعات العمل"
-                        "بتقدر تختار اكتر من شي...",
+                    supTitle: "تعديل ساعات العمل بتقدر تختار اكتر من شي...",
                   ),
-
                   SizedBox(height: 20.h),
-
                   Obx(
                     () => Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-
                       children: List.generate(
                         controller2.workHourOptions.length,
                         (index) => CustomCheckbox(
                           richText: RichText(
-                            textDirection: TextDirection.rtl, // For Arabic text
+                            textDirection: TextDirection.rtl,
                             text: TextSpan(
                               children: controller2.getUnderlinedTextSpans(
                                 controller2.workHourOptions[index],
@@ -58,7 +68,7 @@ class ModifyWorkingHours extends StatelessWidget {
                             ),
                           ),
                           widget: RichText(
-                            textDirection: TextDirection.rtl, // For Arabic text
+                            textDirection: TextDirection.rtl,
                             text: TextSpan(
                               children: controller2.getUnderlinedPriceSpans(
                                 controller2.workHourPrices[index],
@@ -82,18 +92,15 @@ class ModifyWorkingHours extends StatelessWidget {
                       ),
                     ),
                   ),
-
+                  // Favourite Days
                   CustomTitle(
                     title: "شو أيامك المفضلة ؟",
                     supText: true,
                     supTitle: 'يمكنك اختيار اكثر من شي',
                   ),
-
-                  // Days List
                   Wrap(
-                    direction: Axis.horizontal,
-                    spacing: 20, // Horizontal space between items
-                    runSpacing: 10, // Vertical space between rows
+                    spacing: 20,
+                    runSpacing: 10,
                     children: List.generate(controller.days.length, (index) {
                       final day = controller.days[index];
                       return Obx(
@@ -101,11 +108,6 @@ class ModifyWorkingHours extends StatelessWidget {
                           title: "",
                           richText: Text(
                             day,
-                            softWrap:
-                                true, // Allow text to wrap when it exceeds width
-                            overflow:
-                                TextOverflow
-                                    .ellipsis, // Truncate the text if it's too long
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w500,
@@ -118,22 +120,22 @@ class ModifyWorkingHours extends StatelessWidget {
                       );
                     }),
                   ),
-
+                  // Favourite Times
                   CustomTitle(title: "شو أوقاتك المفضلة؟"),
                   SizedBox(height: 10.h),
                   GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 2.2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          childAspectRatio: 2.2,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                        ),
                     itemCount: controller.times.length,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       final time = controller.times[index];
-                      // Wrap only the checkbox with Obx for efficient rebuilds
                       return Obx(
                         () => CustomCheckbox(
                           title: time,
@@ -161,21 +163,15 @@ class ModifyWorkingHours extends StatelessWidget {
             Expanded(
               child: PrimaryButton(
                 onTap: () {
-                  Get.back();
+                  controller.saveUserData();
+                  controller2.saveUserData();
                 },
                 text: "حفظ",
               ),
             ),
-
             SizedBox(width: 40.w),
-
             Expanded(
-              child: ButtonBorder(
-                onTap: () {
-                  Get.back();
-                },
-                text: "عودة",
-              ),
+              child: ButtonBorder(onTap: () => Get.back(), text: "عودة"),
             ),
           ],
         ),

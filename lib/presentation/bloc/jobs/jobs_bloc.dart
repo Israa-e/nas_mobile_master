@@ -8,6 +8,8 @@ import 'jobs_state.dart';
 
 class JobsBloc extends Bloc<JobsEvent, JobsState> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+  Timer? _approvalTimer;
+  final Map<int, Timer> _pendingTimers = {}; // Track timers per job
 
   JobsBloc() : super(JobsInitial()) {
     on<JobsFetchRequested>(_onJobsFetchRequested);
@@ -32,13 +34,30 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
   ) async {
     try {
       final currentUserId = await SharedPrefsHelper.getUserId();
+
+      // Update job to approved
       await _dbHelper.updateJob(event.jobId, {
         'status': 'approved',
         'isPending': 0,
         'appliedBy': currentUserId,
       });
+
+      // Cancel the timer for this job
+      _pendingTimers[event.jobId]?.cancel();
+      _pendingTimers.remove(event.jobId);
+
+      // Emit success message
       emit(const JobActionSuccess('تمت الموافقة على الوظيفة تلقائيًا'));
-      add(JobsFetchRequested(status: 'approved'));
+
+      // **KEY FIX**: Fetch BOTH pending and approved jobs to update both screens
+      // This ensures WaitingScreen removes the job and ApprovalsScreen shows it
+      await Future.delayed(
+        const Duration(milliseconds: 100),
+      ); // Small delay for state update
+      add(const JobsFetchRequested(status: 'pending')); // Update waiting screen
+      add(
+        const JobsFetchRequested(status: 'approved'),
+      ); // Update approvals screen
     } catch (e) {
       emit(JobsError('خطأ أثناء الموافقة على الوظيفة: $e'));
     }
@@ -48,8 +67,11 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
     JobCancelRequested event,
     Emitter<JobsState> emit,
   ) async {
-    emit(JobsLoading());
     try {
+      // Cancel any pending timer for this job
+      _pendingTimers[event.jobId]?.cancel();
+      _pendingTimers.remove(event.jobId);
+
       await _dbHelper.updateJob(event.jobId, {
         'status': 'new',
         'isPending': 0,
@@ -58,8 +80,10 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
 
       // Emit cancellation event with date
       emit(JobCancelledEvent(event.jobId, DateTime.now()));
-
       emit(const JobActionSuccess('تم إلغاء الطلب بنجاح'));
+
+      // Refresh pending jobs list
+      add(const JobsFetchRequested(status: 'pending'));
     } catch (e) {
       emit(JobsError('خطأ أثناء إلغاء الوظيفة: $e'));
     }
@@ -77,9 +101,32 @@ class JobsBloc extends Bloc<JobsEvent, JobsState> {
         'isPending': 1,
         'appliedBy': currentUserId,
       });
+
       emit(const JobActionSuccess('تم التقديم على الوظيفة بنجاح'));
+
+      // ⏰ Automatically approve after 1 minute
+      final timer = Timer(const Duration(minutes: 1), () {
+        if (!isClosed) {
+          print('🔄 Auto-approving job ${event.jobId} after 1 minute');
+          add(JobApproveRequested(event.jobId));
+        }
+      });
+
+      // Store timer for this specific job
+      _pendingTimers[event.jobId] = timer;
     } catch (e) {
       emit(JobsError('خطأ أثناء التقديم على الوظيفة: $e'));
     }
+  }
+
+  @override
+  Future<void> close() {
+    // Cancel all pending timers
+    _approvalTimer?.cancel();
+    for (var timer in _pendingTimers.values) {
+      timer.cancel();
+    }
+    _pendingTimers.clear();
+    return super.close();
   }
 }

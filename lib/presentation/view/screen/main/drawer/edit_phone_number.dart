@@ -9,13 +9,24 @@ import 'package:nas/presentation/view/widget/custom_title.dart';
 import 'package:nas/presentation/view/widget/phone_text_filed.dart';
 import 'package:nas/presentation/view/widget/primary_button.dart';
 
-class EditPhoneNumber extends StatelessWidget {
+class EditPhoneNumber extends StatefulWidget {
   const EditPhoneNumber({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final PageSevenController controller = Get.find<PageSevenController>();
+  State<EditPhoneNumber> createState() => _EditPhoneNumberState();
+}
 
+class _EditPhoneNumberState extends State<EditPhoneNumber> {
+  final PageSevenController controller = Get.find<PageSevenController>();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller.loadUserData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
       body: GestureDetector(
@@ -75,7 +86,7 @@ class EditPhoneNumber extends StatelessWidget {
             Expanded(
               child: PrimaryButton(
                 onTap: () {
-                  Get.back();
+                  controller.saveUserData();
                 },
                 text: "حفظ",
               ),

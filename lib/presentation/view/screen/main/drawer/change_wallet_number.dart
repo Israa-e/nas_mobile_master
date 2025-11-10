@@ -10,13 +10,24 @@ import 'package:nas/presentation/view/widget/custom_title.dart';
 
 import '../../../widget/primary_button.dart';
 
-class ChangeWalletNumber extends StatelessWidget {
+class ChangeWalletNumber extends StatefulWidget {
   const ChangeWalletNumber({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final PageFourController controller = Get.find<PageFourController>();
+  State<ChangeWalletNumber> createState() => _ChangeWalletNumberState();
+}
 
+class _ChangeWalletNumberState extends State<ChangeWalletNumber> {
+  final PageFourController controller = Get.find<PageFourController>();
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    controller.loadUserData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
       body: GestureDetector(
@@ -118,7 +129,7 @@ class ChangeWalletNumber extends StatelessWidget {
             Expanded(
               child: PrimaryButton(
                 onTap: () {
-                  Get.back();
+                  controller.saveUserData();
                 },
                 text: "حفظ",
               ),

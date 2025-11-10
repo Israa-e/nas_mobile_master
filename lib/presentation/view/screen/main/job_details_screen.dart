@@ -24,7 +24,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
   bool isLoading = false;
 
-  Future<void> _applyForJob() async {
+  Future<void> _applyForJob(state) async {
     setState(() => isLoading = true);
 
     try {
@@ -308,7 +308,32 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           children: [
             Expanded(
               child: PrimaryButton(
-                onTap: _applyForJob,
+                onTap: () async {
+                  setState(() => isLoading = true);
+
+                  try {
+                    final currentUserId = await SharedPrefsHelper.getUserId();
+                    if (currentUserId == null) {
+                      showErrorSnackbar(message: 'يرجى تسجيل الدخول أولاً');
+                      setState(() => isLoading = false);
+                      return;
+                    }
+                    // Update job status in database
+                    await _dbHelper.updateJob(widget.job.id, {
+                      'status': 'pending',
+                      'isPending': 1,
+                      'appliedBy': currentUserId, // Use actual user ID
+                    });
+
+                    setState(() => isLoading = false);
+
+                    // Show success dialog
+                    _showSuccessDialog();
+                  } catch (e) {
+                    setState(() => isLoading = false);
+                    showErrorSnackbar(message: 'حدث خطأ أثناء التقديم');
+                  }
+                },
                 text: "تقدم الآن",
                 height: 50,
                 borderRadius: 15,

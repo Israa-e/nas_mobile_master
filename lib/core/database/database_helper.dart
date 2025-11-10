@@ -108,6 +108,7 @@ class DatabaseHelper {
         "governorate": "Gaza",
         "district": "Rafah",
         "location": "Street 12",
+
         "nationalId": "987654321",
         "gender": "Female",
         "nationality": "Palestinian",
