@@ -25,7 +25,8 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       final List<NotificationItem> notifications = [
         NotificationItem(
           title: 'تنبيه جديد',
-          expiryDate: '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+          expiryDate:
+              '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
           type: 'تعليم كمقروء',
           detail: 'مرحباً بك في تطبيق NAS! هذا إشعار ترحيبي.',
           hasBlueHighlight: true,
