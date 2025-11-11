@@ -20,7 +20,7 @@ NAS is a Flutter-based mobile application designed to streamline job application
 This project was developed as part of the Gaza Sky Geeks training program, demonstrating proficiency in:
 - ✅ State Management (BLoC Pattern)
 - ✅ Local Database Storage (SQLite)
-- ✅ Remote API Integration (DummyJSON for notifications)
+- ✅ Remote API Integration (DummyJSON for notifications & Country Codes & Nationalities)
 - ✅ Authentication System
 - ✅ Clean Architecture
 - ✅ Media Handling (Image Picker)
