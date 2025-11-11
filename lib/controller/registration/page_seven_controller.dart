@@ -1,28 +1,38 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/core/database/database_helper.dart';
 import 'package:nas/core/utils/shared_prefs.dart';
 import 'package:nas/presentation/view/widget/custom_snackbar.dart';
+import 'package:nas/data/api/api_service.dart';
 
 class PageSevenController extends GetxController {
   final genderOptions = ['ذكر', 'أنثى'];
   final maritalStatusOptions = ['أعزب', 'متزوج'];
-  final List<String> countryCodeOptions = [
-    '+970',
-    '+972',
-    '+962',
-    '+966',
-    '+967',
-  ];
+  final RxList<String> countryCodeOptions = <String>[].obs;
+  final RxString selectedCountryCode = ''.obs;
+  final ApiService _api = ApiService();
 
-  final RxString selectedCountryCode = '+970'.obs;
   final RxString selectedGender = ''.obs;
   final RxString selectedMaritalStatus = ''.obs;
   final TextEditingController phoneController = TextEditingController();
   final phoneFocusNode = FocusNode();
   RxBool isPhoneSelected = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadCountryCodes();
+  }
+
+  Future<void> loadCountryCodes() async {
+    final result = await _api.getCountryCodes();
+    countryCodeOptions.assignAll(result);
+    if (result.isNotEmpty) {
+      selectedCountryCode.value = result.first;
+    }
+    print("Loaded country codes: $countryCodeOptions"); // 👈 تحقق أنها وصلت
+  }
+
   @override
   void onClose() {
     // Dispose of controllers and focus nodes to prevent memory leaks

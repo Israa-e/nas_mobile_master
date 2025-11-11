@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nas/presentation/view/widget/custom_snackbar.dart';
+import 'package:nas/data/api/api_service.dart';
 
 class PageSixController extends GetxController {
   final formKey = GlobalKey<FormState>();
+  final ApiService _api = ApiService();
 
   final governorateController = TextEditingController();
   final districtController = TextEditingController();
@@ -15,17 +17,22 @@ class PageSixController extends GetxController {
   final districtFocusNode = FocusNode();
   final locationFocusNode = FocusNode();
   final nationalIdFocusNode = FocusNode();
+  final RxList<String> nationalityOptions = <String>[].obs;
 
-  final selectedNationality = RxString('فلسطيني');
+  final selectedNationality = ''.obs;
 
-  List<String> nationalityOptions = [
-    'فلسطيني',
-    'أردني',
-    'مصري',
-    'سوري',
-    'لبناني',
-    'آخر',
-  ];
+  @override
+  void onInit() {
+    super.onInit();
+    fetchNationalities();
+  }
+
+  Future<void> fetchNationalities() async {
+    final result = await _api.getNationalities();
+    nationalityOptions.assignAll(result);
+    print("Loaded nationalities: $nationalityOptions"); // للتأكد من التحميل
+  }
+
   void updateLocation(String address) {
     locationController.text = address;
   }
