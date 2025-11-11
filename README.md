@@ -280,6 +280,7 @@ Password: 123456
   <img src="screenshots/new_jobs.png" width="200" alt="New Jobs"/>
   <img src="screenshots/waiting.png" width="200" alt="Waiting"/>
   <img src="screenshots/approved.png" width="200" alt="Approved"/>
+  <img src="screenshots/warning.png" width="200" alt="warning"/>
 </div>
 
 ### Profile & Settings
