@@ -162,9 +162,23 @@ class _ModifyWorkingHoursState extends State<ModifyWorkingHours> {
           children: [
             Expanded(
               child: PrimaryButton(
-                onTap: () {
+                onTap: () async {
                   controller.saveUserData();
                   controller2.saveUserData();
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    print('🔍 About to navigate back');
+                    print('🔍 Can pop: ${Navigator.of(context).canPop()}');
+                    print('🔍 Get route name: ${Get.currentRoute}');
+
+                    // Try multiple methods to ensure navigation
+                    Get.closeAllSnackbars(); // Close snackbar
+                    Navigator.of(
+                      context,
+                      rootNavigator: true,
+                    ).pop(); // Use root navigator
+
+                    print('🔍 After pop - route: ${Get.currentRoute}');
+                  });
                 },
                 text: "حفظ",
               ),

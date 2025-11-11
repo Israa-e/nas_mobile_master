@@ -17,15 +17,19 @@ import 'package:nas/presentation/view/widget/button_border.dart';
 
 // دالة لعرض صورة المستخدم
 Widget _buildUserImage(String? imagePath) {
-  // إذا لم توجد صورة
-  if (imagePath == null || imagePath.isEmpty || imagePath == 'c') {
-    return Image.asset("${AppUrl.rootImages}/profile.png", fit: BoxFit.cover);
+  const placeholder = "${AppUrl.rootImages}/profile.png";
+
+  if (imagePath == null) return Image.asset(placeholder, fit: BoxFit.cover);
+
+  final trimmed = imagePath.trim();
+  if (trimmed.isEmpty || trimmed == 'c') {
+    return Image.asset(placeholder, fit: BoxFit.cover);
   }
 
-  // إذا كانت الصورة من الإنترنت
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+  // Network image
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
     return Image.network(
-      imagePath,
+      trimmed,
       fit: BoxFit.cover,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
@@ -40,50 +44,36 @@ Widget _buildUserImage(String? imagePath) {
         );
       },
       errorBuilder: (context, error, stackTrace) {
-        return Image.asset(
-          "${AppUrl.rootImages}/profile.png",
-          fit: BoxFit.cover,
-        );
+        print('Error loading network image: $error');
+        return Image.asset(placeholder, fit: BoxFit.cover);
       },
     );
   }
-  // إذا كانت الصورة محلية
+
+  // Local file
+  String localPath = trimmed;
+  if (localPath.startsWith('file://')) {
+    localPath = localPath.replaceFirst('file://', '');
+  }
+
   try {
-    final file = File(imagePath);
+    final file = File(localPath);
     if (file.existsSync()) {
       return Image.file(
         file,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return Image.asset(
-            "${AppUrl.rootImages}/profile.png",
-            fit: BoxFit.cover,
-          );
+          print('Error loading local image: $error');
+          return Image.asset(placeholder, fit: BoxFit.cover);
         },
       );
+    } else {
+      // Not a local file - fallback to placeholder
+      return Image.asset(placeholder, fit: BoxFit.cover);
     }
   } catch (e) {
-    print('Error loading image: $e');
-    return Image.asset("${AppUrl.rootImages}/profile.png", fit: BoxFit.cover);
-  }
-
-  // صورة افتراضية
-  // إذا كانت الصورة محلية
-  try {
-    return Image.file(
-      File(imagePath),
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        print('Error loading image: $error');
-        return Image.asset(
-          "${AppUrl.rootImages}/profile.png",
-          fit: BoxFit.cover,
-        );
-      },
-    );
-  } catch (e) {
-    print('Error loading local image: $e');
-    return Image.asset("${AppUrl.rootImages}/profile.png", fit: BoxFit.cover);
+    print('Error handling image path "$imagePath": $e');
+    return Image.asset(placeholder, fit: BoxFit.cover);
   }
 }
 

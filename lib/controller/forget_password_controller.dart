@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:get/get.dart';
 import 'package:nas/presentation/view/screen/Auth/forgetPassword/change_password.dart';
 import 'package:nas/presentation/view/screen/Auth/forgetPassword/code_validate.dart';
 import 'package:nas/presentation/view/screen/Auth/login.dart';
 import 'package:nas/presentation/view/widget/custom_snackbar.dart';
+import 'package:nas/core/database/database_helper.dart';
+import 'package:nas/core/utils/shared_prefs.dart';
 
 class ForgetPasswordController extends GetxController {
   // Form key for validation
@@ -19,6 +22,7 @@ class ForgetPasswordController extends GetxController {
   final passwordFocusNode = FocusNode();
   final confirmPasswordFocusNode = FocusNode();
   final otpCode = ''.obs;
+  final isOtpVerified = false.obs;
   // Focus management for better user experience
   void handleFocusTransition(FocusNode currentFocus, FocusNode nextFocus) {
     currentFocus.unfocus();
@@ -31,13 +35,21 @@ class ForgetPasswordController extends GetxController {
     // RegExp(r'^\+?[0-9]{10,15}$').hasMatch(phoneNumber);
   }
 
-  sendCode() {
+  Future<void> sendCode() async {
     print('Code sent to ${phoneController.text}');
 
     if (validatePhoneNumber(phoneController.text)) {
       // Simulate sending code
       print('Code sent to ${phoneController.text}');
-      showSuccessSnackbar(message: 'الرمز تم إرساله بنجاح');
+      // Generate a 4-digit OTP and store it locally for verification
+      final otp = (Random().nextInt(9000) + 1000).toString();
+      await SharedPrefsHelper.setUserPhone(phoneController.text.trim());
+      await SharedPrefsHelper.setForgotOtp(otp);
+      // Show the OTP in a snackbar for testing/demo purposes (remove in production)
+      showSuccessSnackbar(
+        message: 'الرمز تم إرساله بنجاح — OTP: $otp',
+        duration: const Duration(seconds: 8),
+      );
       Get.to(() => CodeValidate());
     } else {
       showErrorSnackbar(message: 'يرجى إدخال رقم هاتف صحيح');
@@ -46,19 +58,45 @@ class ForgetPasswordController extends GetxController {
 
   void verifyOtp(String code) {
     otpCode.value = code;
-    print("OTP verified: $code");
-    // Navigate to ChangeToNewPassword screen
+    print("OTP entered: $code");
+    // Compare with stored OTP
+    SharedPrefsHelper.getForgotOtp()
+        .then((stored) {
+          if (stored != null && stored == code) {
+            isOtpVerified.value = true;
+            showSuccessSnackbar(message: 'تم التحقق بنجاح — OTP: $code');
+            Future.delayed(const Duration(milliseconds: 500), () {
+              print('🔍 About to navigate back');
+              print('🔍 Get route name: ${Get.currentRoute}');
+
+              // Try multiple methods to ensure navigation
+              Get.closeAllSnackbars(); // Close snackbar
+
+              goToChangePassword();
+              print('🔍 After pop - route: ${Get.currentRoute}');
+            });
+          } else {
+            isOtpVerified.value = false;
+            showErrorSnackbar(message: 'الرمز غير صحيح');
+          }
+        })
+        .catchError((e) {
+          print('Error reading stored OTP: $e');
+          showErrorSnackbar(message: 'فشل في التحقق من الرمز');
+        });
   }
 
   goToChangePassword() {
-    if (otpCode.value.isNotEmpty) {
+    if (isOtpVerified.value) {
       Get.to(() => ChangeToNewPassword());
+    } else if (otpCode.value.isEmpty) {
+      showErrorSnackbar(message: 'يرجى إدخال الرمز أولاً');
     } else {
       showErrorSnackbar(message: 'يرجى إدخال الرمز الصحيح');
     }
   }
 
-  void updatePassword() {
+  Future<void> updatePassword() async {
     final password = passwordController.text.trim();
     Get.focusScope?.unfocus();
 
@@ -74,11 +112,35 @@ class ForgetPasswordController extends GetxController {
       return;
     }
 
-    // Simulate a successful password update
-    showSuccessSnackbar(message: "تم تحديث كلمة المرور بنجاح");
+    // Persist the new password into the local database
+    try {
+      String? phone = await SharedPrefsHelper.getUserPhone();
+      phone ??= phoneController.text.trim();
+      if (phone.isEmpty) {
+        showErrorSnackbar(message: 'يرجى إدخال رقم الهاتف المستخدم');
+        return;
+      }
 
-    // Navigate to the login screen or another screen
-    Get.offAll(() => LoginScreen()); // Replace '/login' with your login route
+      DatabaseHelper db = DatabaseHelper.instance;
+      final user = await db.getUser(phone);
+      if (user == null) {
+        showErrorSnackbar(message: 'لم يتم العثور على حساب مرتبط بهذا الرقم');
+        return;
+      }
+
+      final userId = user['id'] as int;
+      await db.updateUser(userId, {'password': password});
+
+      showSuccessSnackbar(
+        message: "تم تحديث كلمة المرور بنجاح",
+        duration: const Duration(seconds: 5),
+      );
+      // Navigate to the login screen
+      Get.offAll(() => LoginScreen());
+    } catch (e) {
+      print('Error updating password: $e');
+      showErrorSnackbar(message: 'فشل في تحديث كلمة المرور');
+    }
   }
 
   @override

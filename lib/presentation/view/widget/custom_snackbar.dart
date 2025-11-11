@@ -160,11 +160,12 @@ void customSnackbar({
 void showSuccessSnackbar({
   String title = 'تم حفظ العملية',
   String message = 'تم حفظ التغييرات على المعلومات بنجاح',
+  Duration? duration,
 }) {
   customSnackbar(
     title: title,
     message: message,
-    duration: const Duration(seconds: 3),
+    duration: duration ?? const Duration(seconds: 3),
     color: AppTheme.green,
     icon: "check_circle",
   );

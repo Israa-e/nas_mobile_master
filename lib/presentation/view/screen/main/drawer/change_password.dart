@@ -59,6 +59,38 @@ class _ChangePasswordState extends State<ChangePassword> {
 
   @override
   Widget build(BuildContext context) {
+    Future<void> saveUserData() async {
+      try {
+        int? userId = await SharedPrefsHelper.getUserId();
+        if (userId == null) return;
+
+        DatabaseHelper dbHelper = DatabaseHelper.instance;
+
+        await dbHelper.updateUser(userId, {
+          'password': controller.newPasswordController.text.trim(),
+        });
+
+        showSuccessSnackbar(message: 'تم حفظ كلمة المرور بنجاح');
+        Future.delayed(const Duration(milliseconds: 500), () {
+          print('🔍 About to navigate back');
+          print('🔍 Can pop: ${Navigator.of(context).canPop()}');
+          print('🔍 Get route name: ${Get.currentRoute}');
+
+          // Try multiple methods to ensure navigation
+          Get.closeAllSnackbars(); // Close snackbar
+          Navigator.of(
+            context,
+            rootNavigator: true,
+          ).pop(); // Use root navigator
+
+          print('🔍 After pop - route: ${Get.currentRoute}');
+        });
+      } catch (e) {
+        print('Error saving PageFour data: $e');
+        showInfoSnackbar(message: 'فشل حفظ كلمة المرور');
+      }
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
       body: GestureDetector(
@@ -161,23 +193,5 @@ class _ChangePasswordState extends State<ChangePassword> {
         ),
       ),
     );
-  }
-
-  Future<void> saveUserData() async {
-    try {
-      int? userId = await SharedPrefsHelper.getUserId();
-      if (userId == null) return;
-
-      DatabaseHelper dbHelper = DatabaseHelper.instance;
-
-      await dbHelper.updateUser(userId, {
-        'password': controller.newPasswordController.text.trim(),
-      });
-
-      showSuccessSnackbar(message: 'تم حفظ كلمة المرور بنجاح');
-    } catch (e) {
-      print('Error saving PageFour data: $e');
-      showInfoSnackbar(message: 'فشل حفظ كلمة المرور');
-    }
   }
 }

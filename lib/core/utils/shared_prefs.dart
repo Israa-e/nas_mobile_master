@@ -50,4 +50,22 @@ class SharedPrefsHelper {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
   }
+
+  // Helpers for forget-password OTP (temporary, stored for local verification)
+  static const String _keyForgotOtp = 'forgot_otp';
+
+  static Future<void> setForgotOtp(String otp) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyForgotOtp, otp);
+  }
+
+  static Future<String?> getForgotOtp() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyForgotOtp);
+  }
+
+  static Future<void> clearForgotOtp() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyForgotOtp);
+  }
 }
