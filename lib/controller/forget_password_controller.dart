@@ -78,7 +78,7 @@ class ForgetPasswordController extends GetxController {
     showSuccessSnackbar(message: "تم تحديث كلمة المرور بنجاح");
 
     // Navigate to the login screen or another screen
-    Get.off(() => LoginScreen()); // Replace '/login' with your login route
+    Get.offAll(() => LoginScreen()); // Replace '/login' with your login route
   }
 
   @override

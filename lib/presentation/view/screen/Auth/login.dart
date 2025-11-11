@@ -7,6 +7,7 @@ import 'package:nas/core/database/database_helper.dart';
 import 'package:nas/presentation/bloc/auth/auth_bloc.dart';
 import 'package:nas/presentation/bloc/auth/auth_event.dart';
 import 'package:nas/presentation/bloc/auth/auth_state.dart';
+import 'package:nas/presentation/view/screen/Auth/forgetPassword/forget_password.dart';
 import 'package:nas/presentation/view/screen/Auth/worker_registration_screen.dart';
 import 'package:nas/presentation/view/screen/main/main_home_screen.dart';
 import 'package:nas/presentation/view/widget/button_border.dart';
@@ -155,6 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextButton(
                             onPressed: () {
                               // Navigate to forgot password
+                              Get.to(() => const ForgetPassword());
                             },
                             child: Text(
                               'نسيت كلمة المرور؟',

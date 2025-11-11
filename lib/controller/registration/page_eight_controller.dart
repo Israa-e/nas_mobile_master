@@ -1,6 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:nas/core/database/database_helper.dart';
+import 'package:nas/core/utils/shared_prefs.dart';
 import 'package:nas/presentation/view/widget/custom_snackbar.dart';
 
 class PageEightController extends GetxController {
@@ -34,10 +38,25 @@ class PageEightController extends GetxController {
       // Use an image picker package like `image_picker` to select an image
       final pickedFile = await ImagePicker().pickImage(
         source: ImageSource.gallery,
+        maxWidth: 800, // Optimize image size
+        maxHeight: 800,
+        imageQuality: 85, // Reduce quality slightly for better storage
       );
-      return pickedFile
-          ?.path; // Return the image path or null if no image is selected
+
+      if (pickedFile != null) {
+        // Get the app's local storage directory for saving images
+        final appDir = await getApplicationDocumentsDirectory();
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final savedImage = await File(
+          pickedFile.path,
+        ).copy('${appDir.path}/$fileName');
+
+        print('📸 Image saved to: ${savedImage.path}');
+        return savedImage.path;
+      }
+      return null;
     } catch (e) {
+      print('❌ Error picking image: $e');
       showErrorSnackbar(message: 'فشل في اختيار الصورة');
       return null;
     }
@@ -104,6 +123,26 @@ class PageEightController extends GetxController {
       'personalImage': selectedPersonalImage.value,
       'password': newPasswordController.text,
     };
+  }
+
+  /// Save picked image paths to the user's record in the database.
+  Future<bool> saveImagesToDb() async {
+    try {
+      final int? userId = await SharedPrefsHelper.getUserId();
+      if (userId == null) {
+        showErrorSnackbar(message: 'يرجى تسجيل الدخول أولاً');
+        return false;
+      }
+
+      final data = getFormData();
+      await DatabaseHelper.instance.updateUser(userId, data);
+      showSuccessSnackbar(message: 'تم حفظ الصور بنجاح');
+      return true;
+    } catch (e) {
+      print('❌ Error saving images to DB: $e');
+      showErrorSnackbar(message: 'فشل في حفظ الصور');
+      return false;
+    }
   }
 
   bool validate({bool showSnackbar = true}) {

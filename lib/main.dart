@@ -40,7 +40,17 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => AuthBloc()..add(AuthCheckStatus())),
         BlocProvider(create: (context) => JobsBloc()),
         BlocProvider(create: (context) => NotificationsBloc()),
-        BlocProvider(create: (context) => ViolationsBloc()),
+        BlocProvider(
+          create: (context) {
+            final violationsBloc = ViolationsBloc();
+            final jobsBloc = context.read<JobsBloc>();
+
+            // Attach listener to connect jobs cancellation to violations
+            violationsBloc.attachJobCancellationListener(jobsBloc);
+
+            return violationsBloc;
+          },
+        ),
         BlocProvider(create: (context) => RegistrationBloc()),
       ],
       child: ScreenUtilInit(

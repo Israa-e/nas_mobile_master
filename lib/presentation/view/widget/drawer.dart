@@ -47,7 +47,6 @@ Widget _buildUserImage(String? imagePath) {
       },
     );
   }
-
   // إذا كانت الصورة محلية
   try {
     final file = File(imagePath);
@@ -65,10 +64,27 @@ Widget _buildUserImage(String? imagePath) {
     }
   } catch (e) {
     print('Error loading image: $e');
+    return Image.asset("${AppUrl.rootImages}/profile.png", fit: BoxFit.cover);
   }
 
   // صورة افتراضية
-  return Image.asset("${AppUrl.rootImages}/profile.png", fit: BoxFit.cover);
+  // إذا كانت الصورة محلية
+  try {
+    return Image.file(
+      File(imagePath),
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        print('Error loading image: $error');
+        return Image.asset(
+          "${AppUrl.rootImages}/profile.png",
+          fit: BoxFit.cover,
+        );
+      },
+    );
+  } catch (e) {
+    print('Error loading local image: $e');
+    return Image.asset("${AppUrl.rootImages}/profile.png", fit: BoxFit.cover);
+  }
 }
 
 // دالة لجلب بيانات المستخدم
@@ -128,9 +144,11 @@ Drawer drawer(controller) {
           final String fullName =
               '$firstName ${familyName.isNotEmpty ? familyName : ''}';
           final String phone =
-              (userData?['countryCode'] ?? '+970') +
-              (userData?['phone'] ?? '0000000');
+              (userData?['phone'] ?? '0000000') +
+              " " +
+              (userData?['countryCode'] ?? '+970 ');
 
+          final String? image = userData?['personalImage'];
           return ListView(
             padding: EdgeInsets.zero,
             children: [
@@ -171,32 +189,42 @@ Drawer drawer(controller) {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: Colors.grey[200],
+
+                                      image: DecorationImage(
+                                        image:
+                                            image == null
+                                                ? AssetImage(
+                                                  "${AppUrl.rootImages}/profile.png",
+                                                )
+                                                : FileImage(File(image)),
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
-                                    child:
-                                        userData?['personalImage'] != null &&
-                                                userData!['personalImage']
-                                                    .toString()
-                                                    .startsWith('http')
-                                            ? ClipOval(
-                                              child: Image.network(
-                                                userData['personalImage'],
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (
-                                                  context,
-                                                  error,
-                                                  stackTrace,
-                                                ) {
-                                                  return Image.asset(
-                                                    "${AppUrl.rootImages}/profile.png",
-                                                    fit: BoxFit.contain,
-                                                  );
-                                                },
-                                              ),
-                                            )
-                                            : Image.asset(
-                                              "${AppUrl.rootImages}/profile.png",
-                                              fit: BoxFit.contain,
-                                            ),
+
+                                    // userData?['personalImage'] != null &&
+                                    //         userData!['personalImage']
+                                    //             .toString()
+                                    //             .startsWith('http')
+                                    //     ? ClipOval(
+                                    //       child: Image.network(
+                                    //         userData['personalImage'],
+                                    //         fit: BoxFit.cover,
+                                    //         errorBuilder: (
+                                    //           context,
+                                    //           error,
+                                    //           stackTrace,
+                                    //         ) {
+                                    //           return Image.asset(
+                                    //             "${AppUrl.rootImages}/profile.png",
+                                    //             fit: BoxFit.contain,
+                                    //           );
+                                    //         },
+                                    //       ),
+                                    //     )
+                                    //     : Image.asset(
+                                    //       "${AppUrl.rootImages}/profile.png",
+                                    //       fit: BoxFit.contain,
+                                    //     ),
                                   ),
                                   title: Text(
                                     fullName,

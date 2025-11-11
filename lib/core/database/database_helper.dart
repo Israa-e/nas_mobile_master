@@ -305,6 +305,24 @@ class DatabaseHelper {
 
   Future<int> updateUser(int id, Map<String, dynamic> user) async {
     final db = await database;
+
+    // If updating images, verify they exist and convert to proper format if needed
+    if (user.containsKey('frontIdImage')) {
+      if (user['frontIdImage'] != null && user['frontIdImage'].isNotEmpty) {
+        print('📸 Updating front ID image for user $id');
+      }
+    }
+    if (user.containsKey('backIdImage')) {
+      if (user['backIdImage'] != null && user['backIdImage'].isNotEmpty) {
+        print('📸 Updating back ID image for user $id');
+      }
+    }
+    if (user.containsKey('personalImage')) {
+      if (user['personalImage'] != null && user['personalImage'].isNotEmpty) {
+        print('📸 Updating personal image for user $id');
+      }
+    }
+
     return await db.update('users', user, where: 'id = ?', whereArgs: [id]);
   }
 

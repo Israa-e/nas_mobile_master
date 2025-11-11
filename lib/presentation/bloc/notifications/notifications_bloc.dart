@@ -21,38 +21,50 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     emit(NotificationsLoading());
 
     try {
-      // Using JSONPlaceholder as dummy API
-      final response = await _apiClient.get('/comments?_limit=15');
+      // Default local notifications (guaranteed to show at least one)
+      final List<NotificationItem> notifications = [
+        NotificationItem(
+          title: 'تنبيه جديد',
+          expiryDate: '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+          type: 'تعليم كمقروء',
+          detail: 'مرحباً بك في تطبيق NAS! هذا إشعار ترحيبي.',
+          hasBlueHighlight: true,
+        ),
+      ];
 
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-
-        final notifications =
+      // Try to fetch additional notifications from API and append them
+      try {
+        final response = await _apiClient.get('/comments?_limit=5');
+        if (response.statusCode == 200) {
+          final List<dynamic> data = response.data;
+          notifications.addAll(
             data.map((item) {
-              final isRead =
-                  item['id'] % 3 == 0; // Simulate some read notifications
+              final isRead = (item['id'] ?? 0) % 3 == 0;
               return NotificationItem(
-                title: _getRandomNotificationType(item['id']),
-                expiryDate: '${15 + (item['id'] % 15)}/3/2025',
+                title: _getRandomNotificationType(item['id'] ?? 0),
+                expiryDate: '${15 + ((item['id'] ?? 0) % 15)}/11/2025',
                 type: isRead ? 'قراءة' : 'تعليم كمقروء',
-                detail: item['body'],
+                detail: item['body']?.toString() ?? 'تفاصيل الإشعار',
                 hasBlueHighlight: !isRead,
               );
-            }).toList();
-
-        final unreadCount =
-            notifications.where((n) => n.hasBlueHighlight).length;
-
-        emit(
-          NotificationsLoaded(
-            notifications: notifications,
-            unreadCount: unreadCount,
-          ),
-        );
-      } else {
-        emit(const NotificationsError('فشل في تحميل الإشعارات'));
+            }).toList(),
+          );
+        }
+      } catch (e) {
+        // Non-fatal: keep default notifications
+        print('Warning: Could not fetch additional notifications: $e');
       }
-    } catch (e) {
+
+      final unreadCount = notifications.where((n) => n.hasBlueHighlight).length;
+
+      emit(
+        NotificationsLoaded(
+          notifications: notifications,
+          unreadCount: unreadCount,
+        ),
+      );
+    } catch (e, st) {
+      print('Error loading notifications: $e\n$st');
       emit(NotificationsError(e.toString()));
     }
   }
