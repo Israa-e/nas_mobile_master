@@ -83,88 +83,12 @@ This project was developed as part of the Gaza Sky Geeks training program, demon
 
 ---
 
-## 🏗️ Architecture
-
-### Project Structure
-```
-lib/
-├── controller/              # GetX Controllers
-│   ├── home/               # Home screen controllers
-│   └── registration/       # Registration wizard controllers
-├── core/
-│   ├── constant/           # App constants (theme, routes, URLs)
-│   ├── database/           # SQLite database helper
-│   ├── network/            # API client
-│   └── utils/              # Shared preferences helper
-├── data/
-│   ├── models/             # Data models
-│   └── repositories/       # Data repositories
-├── presentation/
-│   ├── bloc/               # BLoC state management
-│   │   ├── auth/           # Authentication BLoC
-│   │   ├── jobs/           # Jobs BLoC
-│   │   ├── notifications/  # Notifications BLoC
-│   │   └── violations/     # Violations BLoC
-│   └── view/
-│       ├── screen/         # App screens
-│       └── widget/         # Reusable widgets
-└── main.dart
-```
-
 ### State Management Strategy
 - **BLoC Pattern** for complex state management (jobs, notifications, violations)
 - **GetX** for navigation and simple state
 - **ValueNotifier** for local widget state
 
-### Data Flow
-```
-UI Layer (Screens/Widgets)
-    ↓
-BLoC Layer (Business Logic)
-    ↓
-Repository Layer (Data Sources)
-    ↓
-Data Layer (API/Database)
-```
-
----
-
 ## 🛠️ Technologies & Packages
-
-### Core Dependencies
-```yaml
-dependencies:
-  flutter_bloc: ^8.1.3          # State management
-  get: ^4.6.6                   # Navigation & simple state
-  sqflite: ^2.3.0               # Local database
-  dio: ^5.4.0                   # HTTP client
-  
-  # UI & Design
-  flutter_screenutil: ^5.9.0    # Responsive UI
-  auto_size_text: ^3.0.0        # Auto-sizing text
-  flutter_svg: ^2.0.9           # SVG support
-  smooth_page_indicator: ^1.1.0 # Page indicators
-  
-  # Media & Files
-  image_picker: ^1.0.7          # Image selection
-  
-  # Firebase
-  firebase_core: ^2.24.2        # Firebase core
-  firebase_messaging: ^14.7.10  # Push notifications
-  flutter_local_notifications: ^16.3.0  # Local notifications
-  
-  # Location
-  google_maps_flutter: ^2.5.3   # Maps integration
-  geocoding: ^2.1.1             # Address conversion
-  
-  # Storage
-  shared_preferences: ^2.2.2    # Key-value storage
-  
-  # Utilities
-  equatable: ^2.0.5             # Value equality
-```
-
----
 
 ## 📊 Database Schema
 
